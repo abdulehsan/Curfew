@@ -1,0 +1,35 @@
+{
+  "appId": "com.focuscontract.app",
+  "productName": "FocusContract",
+  "directories": {
+    "output": "dist"
+  },
+  "files": [
+    "out/**/*",
+    "node_modules/active-win/**/*"
+  ],
+  "asarUnpack": [
+    "**/node_modules/active-win/**"
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      },
+      {
+        "target": "portable",
+        "arch": ["x64"]
+      }
+    ],
+    "requestedExecutionLevel": "asInvoker"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "FocusContract"
+  }
+}
