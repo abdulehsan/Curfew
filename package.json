@@ -1,0 +1,62 @@
+{
+  "name": "focuscontract",
+  "version": "0.1.0",
+  "description": "Intent-based accountability tool for Windows with strikes, save-your-progress grace period, and app limits",
+  "main": "./out/main/index.js",
+  "author": "FocusContract Contributors",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "build:win": "pnpm build && electron-builder --win",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css,yml,yaml}\"",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "active-win": "^8.2.1",
+    "electron-store": "^8.2.0",
+    "lucide-react": "^0.453.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "@types/node": "^20.17.0",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.8.0",
+    "@typescript-eslint/parser": "^8.8.0",
+    "@vitejs/plugin-react": "^4.3.2",
+    "@vitest/coverage-v8": "^2.1.2",
+    "electron": "^32.1.2",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.37.1",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8",
+    "vitest": "^2.1.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css}": [
+      "prettier --write"
+    ]
+  }
+}

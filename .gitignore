@@ -1,0 +1,42 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node modules
+node_modules
+dist
+dist-electron
+out
+.cache
+coverage
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Electron builder
+release
+*.exe
+*.msi
+*.zip
+*.blockmap
+*.yml
+!dependabot.yml
+!.github/**/*.yml

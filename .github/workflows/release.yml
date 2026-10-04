@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Build & Release Windows Binaries
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck and Tests
+        run: |
+          pnpm run typecheck
+          pnpm run test
+
+      - name: Build Application
+        run: pnpm run build
+
+      - name: Package with Electron Builder
+        run: pnpm exec electron-builder --win nsis portable --publish never
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: |
+            dist/*.exe
+            dist/*.blockmap
