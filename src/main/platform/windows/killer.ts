@@ -56,7 +56,7 @@ export class WindowsProcessKiller implements ProcessKiller {
       if (execError.code === 1 || execError.code === 5) {
         this.notifier?.send(
           'Permission Required',
-          `Could not close process (PID ${pid}). Please close it manually or run FocusContract as administrator.`
+          `Could not close process (PID ${pid}). Please close it manually or run Curfew as administrator.`
         )
       }
       return false

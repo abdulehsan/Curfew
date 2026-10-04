@@ -38,7 +38,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ status, config }) => {
       <div className="page-container">
         <div className="glass-card" style={{ textAlign: 'center', padding: '40px' }}>
           <Activity className="animate-spin" size={32} color="#f43f5e" style={{ margin: '0 auto 12px' }} />
-          <p style={{ color: 'var(--text-muted)' }}>Connecting to FocusContract engine...</p>
+          <p style={{ color: 'var(--text-muted)' }}>Connecting to Curfew engine...</p>
         </div>
       </div>
     )

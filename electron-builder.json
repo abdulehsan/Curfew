@@ -1,6 +1,6 @@
 {
-  "appId": "com.focuscontract.app",
-  "productName": "FocusContract",
+  "appId": "com.curfew.app",
+  "productName": "Curfew",
   "directories": {
     "output": "dist"
   },
@@ -30,6 +30,6 @@
     "allowToChangeInstallationDirectory": true,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "FocusContract"
+    "shortcutName": "Curfew"
   }
 }

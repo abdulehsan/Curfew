@@ -1,7 +1,7 @@
-import type { FocusContractAPI } from './index'
+import type { CurfewAPI } from './index'
 
 declare global {
   interface Window {
-    api: FocusContractAPI
+    api: CurfewAPI
   }
 }

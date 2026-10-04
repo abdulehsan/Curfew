@@ -41,7 +41,7 @@ export const App: React.FC = () => {
   if (!window.api) {
     return (
       <div style={{ padding: '40px', color: '#f87171', fontFamily: 'sans-serif' }}>
-        <h2>FocusContract Bridge Connecting...</h2>
+        <h2>Curfew Bridge Connecting...</h2>
         <p>Waiting for Electron preload bridge...</p>
       </div>
     )
@@ -60,7 +60,7 @@ export const App: React.FC = () => {
             <Target size={20} />
           </div>
           <div>
-            <div className="brand-title">FocusContract</div>
+            <div className="brand-title">Curfew</div>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', letterSpacing: '0.04em' }}>
               SELF DISCIPLINE v0.1
             </div>

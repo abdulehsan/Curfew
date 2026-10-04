@@ -31,7 +31,7 @@ app.on('second-instance', () => {
 
 app.whenReady().then(async () => {
   // Set application user model id for Windows notifications
-  app.setAppUserModelId('com.focuscontract.app')
+  app.setAppUserModelId('com.curfew.app')
 
   // Initialize store and providers
   const store = new AppStore()

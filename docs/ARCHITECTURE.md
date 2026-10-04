@@ -1,6 +1,6 @@
-# FocusContract Architecture
+# Curfew Architecture
 
-FocusContract is built on strict engineering principles ensuring deterministic behavior, cross-platform extensibility, and testability.
+Curfew is built on strict engineering principles ensuring deterministic behavior, cross-platform extensibility, and testability.
 
 ```
                       +---------------------------------------+

@@ -33,7 +33,7 @@ export function createInitialState(
 }
 
 /**
- * Pure state reducer for FocusContract.
+ * Pure state reducer for Curfew.
  * Contains no OS or Electron imports. Fully deterministic.
  */
 export function handleTick(

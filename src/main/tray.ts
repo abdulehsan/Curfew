@@ -18,7 +18,7 @@ export function createTrayManager(windowManager: WindowManager): {
   )
 
   const tray = new Tray(icon)
-  tray.setToolTip('FocusContract - Self Accountability')
+  tray.setToolTip('Curfew - Self Accountability')
 
   let currentStatus: EngineStatus | null = null
 
@@ -55,7 +55,7 @@ export function createTrayManager(windowManager: WindowManager): {
     // While in GRACE or LOCKED, hide the Quit item as per 5.6
     if (!isLockedOrGrace) {
       menuTemplate.push({
-        label: 'Quit FocusContract',
+        label: 'Quit Curfew',
         click: (): void => {
           app.quit()
         }

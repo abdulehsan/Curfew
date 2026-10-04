@@ -29,7 +29,7 @@ export function createWindowManager(): WindowManager {
       minHeight: 600,
       show: false,
       autoHideMenuBar: true,
-      title: 'FocusContract',
+      title: 'Curfew',
       backgroundColor: '#0f172a',
       webPreferences: {
         preload: join(__dirname, '../preload/index.js'),

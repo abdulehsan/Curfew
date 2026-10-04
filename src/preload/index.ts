@@ -14,7 +14,7 @@ import type {
   UpdateConfigInput
 } from '@shared/ipc'
 
-export interface FocusContractAPI {
+export interface CurfewAPI {
   getEngineStatus: () => Promise<EngineStatus>
   requestExtension: (input: RequestExtensionInput) => Promise<{ success: boolean; error?: string }>
   getTargets: () => Promise<TargetApp[]>
@@ -29,7 +29,7 @@ export interface FocusContractAPI {
   onStateUpdated: (callback: (status: EngineStatus) => void) => () => void
 }
 
-const api: FocusContractAPI = {
+const api: CurfewAPI = {
   getEngineStatus: () => ipcRenderer.invoke(IPC_CHANNELS.GET_ENGINE_STATUS),
   requestExtension: (input) => ipcRenderer.invoke(IPC_CHANNELS.REQUEST_EXTENSION, input),
   getTargets: () => ipcRenderer.invoke(IPC_CHANNELS.GET_TARGETS),
@@ -59,6 +59,6 @@ if (process.contextIsolated) {
     console.error('Failed to expose context bridge api:', error)
   }
 } else {
-  const globalWin = window as unknown as { api: FocusContractAPI }
+  const globalWin = window as unknown as { api: CurfewAPI }
   globalWin.api = api
 }

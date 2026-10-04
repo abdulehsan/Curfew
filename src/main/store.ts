@@ -40,7 +40,7 @@ export class AppStore {
     const todayDate = new Date().toISOString().split('T')[0]
 
     this.store = new Store<AppStoreData>({
-      name: 'focuscontract-config',
+      name: 'curfew-config',
       defaults: {
         version: CURRENT_SCHEMA_VERSION,
         config: getDefaultConfig(),

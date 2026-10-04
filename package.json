@@ -1,9 +1,9 @@
 {
-  "name": "focuscontract",
+  "name": "curfew",
   "version": "0.1.0",
   "description": "Intent-based accountability tool for Windows with strikes, save-your-progress grace period, and app limits",
   "main": "./out/main/index.js",
-  "author": "FocusContract Contributors",
+  "author": "Curfew Contributors",
   "license": "MIT",
   "private": true,
   "scripts": {

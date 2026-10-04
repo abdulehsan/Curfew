@@ -111,7 +111,7 @@ export const Settings: React.FC<SettingsProps> = ({ config, onConfigChange }) =>
                 Launch on Windows Startup
               </div>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                Automatically starts FocusContract minimized to tray when you boot your PC.
+                Automatically starts Curfew minimized to tray when you boot your PC.
               </p>
             </div>
 
@@ -150,7 +150,7 @@ export const Settings: React.FC<SettingsProps> = ({ config, onConfigChange }) =>
           Digital Self-Regulation Scope
         </h4>
         <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-          FocusContract is built as an accountability partner for self-directed discipline. It does not install intrusive rootkits or prevent Task Manager termination.
+          Curfew is built as an accountability partner for self-directed discipline. It does not install intrusive rootkits or prevent Task Manager termination.
           Target closure sends standard Windows <code>WM_CLOSE</code> requests, giving games time to save before clean termination.
         </p>
       </div>

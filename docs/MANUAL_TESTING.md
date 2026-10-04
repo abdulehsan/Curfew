@@ -1,14 +1,14 @@
 # Manual QA Testing Checklist
 
-This checklist documents manual testing procedures for FocusContract across real-world games, browsers, and Windows lifecycle events.
+This checklist documents manual testing procedures for Curfew across real-world games, browsers, and Windows lifecycle events.
 
 ## Test Matrix
 
 ### 1. Valorant (Riot Vanguard & Launcher Separation)
-- [ ] Launch `RiotClientServices.exe` (Riot Client). Ensure FocusContract does not prematurely deduct time if only tracking the game.
-- [ ] In FocusContract Target List, select `VALORANT-Win64-Shipping.exe`.
+- [ ] Launch `RiotClientServices.exe` (Riot Client). Ensure Curfew does not prematurely deduct time if only tracking the game.
+- [ ] In Curfew Target List, select `VALORANT-Win64-Shipping.exe`.
 - [ ] Launch Valorant into practice range or custom lobby.
-- [ ] Verify FocusContract detects `VALORANT-Win64-Shipping.exe` as active foreground window and starts deducting time.
+- [ ] Verify Curfew detects `VALORANT-Win64-Shipping.exe` as active foreground window and starts deducting time.
 - [ ] Alt-Tab to desktop or browser; verify time deduction pauses immediately.
 - [ ] When budget reaches zero, verify strike prompt overlay appears without minimizing or interrupting game fullscreen.
 - [ ] Exhaust 3 strikes; verify the 100-second Save Progress Grace overlay appears on screen.
@@ -20,7 +20,7 @@ This checklist documents manual testing procedures for FocusContract across real
 - [ ] Run game. Verify live tracking badge transitions to `TRACKING` and timer decreases.
 - [ ] Request strike extension (+5 minutes); verify strikes increment (1/3) and time adds properly.
 - [ ] Close game voluntarily during GRACE period; verify app immediately transitions to `LOCKED`.
-- [ ] Attempt to restart `cs2.exe` while in `LOCKED`; verify FocusContract terminates it within 1000ms.
+- [ ] Attempt to restart `cs2.exe` while in `LOCKED`; verify Curfew terminates it within 1000ms.
 
 ### 3. Web Browser Target (`chrome.exe` / `msedge.exe`)
 - [ ] Add `chrome.exe` or `msedge.exe` via Targets manager.
@@ -40,7 +40,7 @@ This checklist documents manual testing procedures for FocusContract across real
 - [ ] Put Windows to Sleep (`powercfg /hibernate` or Start Menu -> Sleep).
 - [ ] Wake PC after 10 minutes.
 - [ ] Verify remaining time is clamped (`delta <= 5000ms`) and still ~43 minutes (sleep duration did NOT wipe the budget).
-- [ ] Verify `focuscontract-config.json` in AppData retains accurate remaining time and strike counts across PC restart.
+- [ ] Verify `curfew-config.json` in AppData retains accurate remaining time and strike counts across PC restart.
 
 ### 6. Midnight Daily Reset
 - [ ] Lock out app (State: `LOCKED`, Strikes: 3/3).

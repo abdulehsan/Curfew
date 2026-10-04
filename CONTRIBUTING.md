@@ -1,6 +1,6 @@
-# Contributing to FocusContract
+# Contributing to Curfew
 
-Thank you for your interest in contributing to FocusContract!
+Thank you for your interest in contributing to Curfew!
 
 ## Development Setup
 
@@ -11,8 +11,8 @@ Thank you for your interest in contributing to FocusContract!
 
 2. **Clone & Install:**
    ```bash
-   git clone https://github.com/FocusContract/focuscontract.git
-   cd focuscontract
+   git clone https://github.com/abdulehsan/Curfew.git
+   cd Curfew
    pnpm install
    ```
 

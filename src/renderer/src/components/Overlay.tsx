@@ -141,7 +141,7 @@ export const Overlay: React.FC = () => {
         {/* Bottom Hint */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#64748b' }}>
           <span>Target: {status.activeTarget?.name || status.activeProcess?.name || 'Active Game'}</span>
-          <span>FocusContract Non-Invasive Protection</span>
+          <span>Curfew Non-Invasive Protection</span>
         </div>
       </div>
     </div>
