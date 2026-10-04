@@ -9,6 +9,7 @@ export const Overlay: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!window.api) return
     window.api.getEngineStatus().then(setStatus).catch(console.error)
     const unsubscribe = window.api.onStateUpdated((newStatus) => {
       setStatus(newStatus)

@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { IPC_CHANNELS } from '@shared/ipc'
+import { IPC_CHANNELS } from '@shared/channels'
 import type {
   EngineStatus,
   TargetApp,

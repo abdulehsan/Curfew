@@ -25,6 +25,7 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     if (isOverlayMode) return
+    if (!window.api) return
 
     window.api.getEngineStatus().then(setStatus).catch(console.error)
     window.api.getConfig().then(setConfig).catch(console.error)
@@ -36,6 +37,15 @@ export const App: React.FC = () => {
 
     return () => unsubscribe()
   }, [isOverlayMode])
+
+  if (!window.api) {
+    return (
+      <div style={{ padding: '40px', color: '#f87171', fontFamily: 'sans-serif' }}>
+        <h2>FocusContract Bridge Connecting...</h2>
+        <p>Waiting for Electron preload bridge...</p>
+      </div>
+    )
+  }
 
   if (isOverlayMode) {
     return <Overlay />
