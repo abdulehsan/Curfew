@@ -1,6 +1,6 @@
 export const DEFAULT_DAILY_BUDGET_MIN = 60
 export const MAX_STRIKES = 3
-export const MAX_EXTENSION_MIN = 30
+export const MAX_EXTENSION_MIN = 10
 export const MIN_EXTENSION_MIN = 1
 export const GRACE_SECONDS = 100
 export const IDLE_THRESHOLD_SEC = 120

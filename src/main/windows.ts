@@ -67,8 +67,8 @@ export function createWindowManager(): WindowManager {
     const primaryDisplay = screen.getPrimaryDisplay()
     const { width: screenWidth } = primaryDisplay.workAreaSize
 
-    const overlayWidth = 460
-    const overlayHeight = 220
+    const overlayWidth = 480
+    const overlayHeight = 320
     const x = Math.round(screenWidth - overlayWidth - 30)
     const y = 40
 

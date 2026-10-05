@@ -241,12 +241,12 @@ describe('Pure State Machine - handleRequestExtension', () => {
       strikeCount: 1
     }
 
-    const { nextState, effects } = handleRequestExtension(state, 15)
+    const { nextState, effects } = handleRequestExtension(state, 10)
 
     expect(effects.error).toBeUndefined()
     expect(nextState.strikeCount).toBe(2)
     expect(nextState.state).toBe('EXTENDED')
-    expect(nextState.remainingMs).toBe(15 * 60 * 1000) // added from 0 base
+    expect(nextState.remainingMs).toBe(10 * 60 * 1000) // added from 0 base
   })
 
   it('rejects extension when max strikes (3) have already been reached', () => {
@@ -262,7 +262,7 @@ describe('Pure State Machine - handleRequestExtension', () => {
     expect(nextState.strikeCount).toBe(3)
   })
 
-  it('rejects extension with invalid minute duration (< 1 or > 30)', () => {
+  it('rejects extension with invalid minute duration (< 1 or > 10)', () => {
     const state: EngineState = {
       ...createInitialState('2026-10-05', 60),
       state: 'PROMPTING',
@@ -272,8 +272,28 @@ describe('Pure State Machine - handleRequestExtension', () => {
     const resultLow = handleRequestExtension(state, 0)
     expect(resultLow.effects.error).toBeDefined()
 
-    const resultHigh = handleRequestExtension(state, 31)
+    const resultHigh = handleRequestExtension(state, 11)
     expect(resultHigh.effects.error).toBeDefined()
+  })
+
+  it('counts down 100s in PROMPTING and locks with target closure if ignored', () => {
+    const state: EngineState = {
+      ...createInitialState('2026-10-05', 60),
+      state: 'PROMPTING',
+      remainingMs: 0,
+      graceRemainingSec: 100,
+      strikeCount: 1
+    }
+
+    // 50s tick
+    let res = handleTick(state, createDefaultTickInput({ deltaMs: 50000, hasRunningTargets: true }))
+    expect(res.nextState.state).toBe('PROMPTING')
+    expect(res.nextState.graceRemainingSec).toBe(50)
+
+    // another 50s tick -> reaches 0s
+    res = handleTick(res.nextState, createDefaultTickInput({ deltaMs: 50000, hasRunningTargets: true }))
+    expect(res.nextState.state).toBe('LOCKED')
+    expect(res.effects.shouldCloseTargets).toBe(true)
   })
 
   it('rejects extension when in GRACE or LOCKED state', () => {

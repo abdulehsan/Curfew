@@ -90,6 +90,7 @@ export function handleTick(
       if (currentState.remainingMs <= 0) {
         if (currentState.strikeCount < config.maxStrikes) {
           currentState.state = 'PROMPTING'
+          currentState.graceRemainingSec = config.graceSeconds
         } else {
           // All strikes exhausted (strikeCount === MAX_STRIKES)
           if (input.hasRunningTargets) {
@@ -105,16 +106,30 @@ export function handleTick(
     }
 
     case 'PROMPTING': {
-      // User is prompted with extension overlay.
-      // If remainingMs <= 0 and strikes exhausted, go to GRACE or LOCKED.
+      // If target closed while prompting, lock immediately
+      if (!input.hasRunningTargets) {
+        currentState.state = 'LOCKED'
+        break
+      }
+
+      // If strikes exhausted, transition to GRACE
       if (currentState.strikeCount >= config.maxStrikes) {
-        if (input.hasRunningTargets) {
-          currentState.state = 'GRACE'
-          currentState.graceRemainingSec = config.graceSeconds
-          effects.shouldNotifyGrace = config.graceSeconds
-        } else {
-          currentState.state = 'LOCKED'
-        }
+        currentState.state = 'GRACE'
+        currentState.graceRemainingSec = config.graceSeconds
+        effects.shouldNotifyGrace = config.graceSeconds
+        break
+      }
+
+      // 100-second decision window: deduct elapsed seconds
+      const prevSec = currentState.graceRemainingSec
+      const elapsedSec = Math.max(1, Math.round(input.deltaMs / 1000))
+      const nextSec = Math.max(0, prevSec - elapsedSec)
+      currentState.graceRemainingSec = nextSec
+
+      // If ignored for 100s, window expires -> enforce target closure and lock
+      if (nextSec <= 0) {
+        currentState.state = 'LOCKED'
+        effects.shouldCloseTargets = true
       }
       break
     }
@@ -203,6 +218,7 @@ export function handleRequestExtension(
     ...state,
     strikeCount: state.strikeCount + 1,
     remainingMs: nextRemaining,
+    graceRemainingSec: config.graceSeconds,
     state: 'EXTENDED'
   }
 
