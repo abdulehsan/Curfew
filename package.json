@@ -21,7 +21,7 @@
   "dependencies": {
     "active-win": "^8.2.1",
     "electron-store": "^8.2.0",
-    "lucide-react": "^0.453.0",
+    "lucide-react": "^0.577.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zod": "^3.23.8"
