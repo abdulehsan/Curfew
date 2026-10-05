@@ -3,6 +3,12 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 class Program {
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern IntPtr OpenInputDesktop(uint dwFlags, bool fInherit, uint dwDesiredAccess);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern bool SetThreadDesktop(IntPtr hDesktop);
+
     [DllImport("user32.dll")]
     static extern IntPtr GetForegroundWindow();
 
@@ -13,6 +19,13 @@ class Program {
     static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
     static void Main() {
+        try {
+            IntPtr hDesk = OpenInputDesktop(0, false, 0x01FF);
+            if (hDesk != IntPtr.Zero) {
+                SetThreadDesktop(hDesk);
+            }
+        } catch {}
+
         IntPtr hwnd = GetForegroundWindow();
         if (hwnd == IntPtr.Zero) {
             Console.WriteLine("{\"pid\":0,\"title\":\"\"}");

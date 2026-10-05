@@ -1,6 +1,6 @@
 {
   "name": "curfew",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Intent-based accountability tool for Windows with strikes, save-your-progress grace period, and app limits",
   "main": "./out/main/index.js",
   "author": "Curfew Contributors",
