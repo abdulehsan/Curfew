@@ -1,6 +1,6 @@
 {
   "name": "curfew",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Intent-based accountability tool for Windows with strikes, save-your-progress grace period, and app limits",
   "main": "./out/main/index.js",
   "author": "Curfew Contributors",
@@ -8,7 +8,8 @@
   "private": true,
   "scripts": {
     "dev": "electron-vite dev",
-    "build": "electron-vite build",
+    "compile:helper": "powershell -Command \"New-Item -ItemType Directory -Force -Path resources; & 'C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe' /nologo /optimize /target:exe '/out:resources\\get-foreground.exe' 'src\\main\\platform\\windows\\get-foreground.cs'\"",
+    "build": "pnpm compile:helper && electron-vite build",
     "build:win": "pnpm build && electron-builder --win",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
