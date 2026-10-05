@@ -24,6 +24,7 @@ export interface CurfewAPI {
   getConfig: () => Promise<AppConfig>
   updateConfig: (input: UpdateConfigInput) => Promise<AppConfig>
   getHistory: () => Promise<DailyUsageRecord[]>
+  pickExecutableFile: () => Promise<{ filePath: string; executable: string; name: string } | null>
   minimizeWindow: () => void
   closeWindow: () => void
   onStateUpdated: (callback: (status: EngineStatus) => void) => () => void
@@ -39,6 +40,7 @@ const api: CurfewAPI = {
   getConfig: () => ipcRenderer.invoke(IPC_CHANNELS.GET_CONFIG),
   updateConfig: (input) => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_CONFIG, input),
   getHistory: () => ipcRenderer.invoke(IPC_CHANNELS.GET_HISTORY),
+  pickExecutableFile: () => ipcRenderer.invoke(IPC_CHANNELS.PICK_EXECUTABLE_FILE),
   minimizeWindow: () => ipcRenderer.send(IPC_CHANNELS.WINDOW_MINIMIZE),
   closeWindow: () => ipcRenderer.send(IPC_CHANNELS.WINDOW_CLOSE),
   onStateUpdated: (callback) => {

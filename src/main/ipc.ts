@@ -1,4 +1,5 @@
-import { ipcMain, BrowserWindow } from 'electron'
+import { ipcMain, BrowserWindow, dialog } from 'electron'
+import path from 'path'
 import {
   IPC_CHANNELS,
   RequestExtensionSchema,
@@ -125,6 +126,35 @@ export function setupIpcHandlers(
   // History
   ipcMain.handle(IPC_CHANNELS.GET_HISTORY, () => {
     return store.getHistory()
+  })
+
+  // Native File Picker Dialog
+  ipcMain.handle(IPC_CHANNELS.PICK_EXECUTABLE_FILE, async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const options: Electron.OpenDialogOptions = {
+      title: 'Select Target Application or Game (.exe)',
+      properties: ['openFile'],
+      filters: [
+        { name: 'Executable Files (*.exe)', extensions: ['exe'] },
+        { name: 'All Files (*.*)', extensions: ['*'] }
+      ]
+    }
+
+    const result = win ? await dialog.showOpenDialog(win, options) : await dialog.showOpenDialog(options)
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return null
+    }
+
+    const filePath = result.filePaths[0]
+    const baseName = path.basename(filePath)
+    const parsed = path.parse(baseName)
+
+    return {
+      filePath,
+      executable: baseName.toLowerCase(),
+      name: parsed.name
+    }
   })
 
   // Window Controls

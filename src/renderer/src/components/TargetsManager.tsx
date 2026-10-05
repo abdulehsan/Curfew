@@ -9,7 +9,11 @@ import {
   RefreshCw,
   Info,
   Search,
-  Check
+  Check,
+  FolderOpen,
+  FileCode,
+  Sparkles,
+  Gamepad2
 } from 'lucide-react'
 
 interface TargetsManagerProps {
@@ -24,6 +28,8 @@ export const TargetsManager: React.FC<TargetsManagerProps> = ({ targets, onTarge
   const [manualName, setManualName] = useState<string>('')
   const [searchFilter, setSearchFilter] = useState<string>('')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [isPickingFile, setIsPickingFile] = useState<boolean>(false)
 
   const fetchRunningProcesses = async (): Promise<void> => {
     setIsLoadingProcesses(true)
@@ -44,29 +50,49 @@ export const TargetsManager: React.FC<TargetsManagerProps> = ({ targets, onTarge
 
   const handleAddTarget = async (executable: string, name?: string): Promise<void> => {
     setErrorMsg(null)
+    setSuccessMsg(null)
     const cleanExe = executable.trim().toLowerCase()
     if (!cleanExe) return
 
     if (!cleanExe.endsWith('.exe')) {
-      setErrorMsg('Executable name must end in .exe (e.g. valorant-win64-shipping.exe)')
+      setErrorMsg('Executable name must end with .exe (e.g. game.exe)')
       return
     }
 
     try {
       const updated = await window.api.addTarget({
         executable: cleanExe,
-        name: name?.trim() || cleanExe
+        name: name?.trim() || cleanExe.replace(/\.exe$/i, '')
       })
       onTargetsChange(updated)
       setManualExecutable('')
       setManualName('')
+      setSuccessMsg(`Added ${name || cleanExe} to accountability targets!`)
+      setTimeout(() => setSuccessMsg(null), 3000)
     } catch (err: unknown) {
       setErrorMsg((err as Error).message || 'Failed to add target')
     }
   }
 
+  const handlePickFile = async (): Promise<void> => {
+    setIsPickingFile(true)
+    setErrorMsg(null)
+    try {
+      const picked = await window.api.pickExecutableFile()
+      if (picked) {
+        // Automatically add the picked executable
+        await handleAddTarget(picked.executable, picked.name)
+      }
+    } catch (err: unknown) {
+      setErrorMsg((err as Error).message || 'Failed to open file picker')
+    } finally {
+      setIsPickingFile(false)
+    }
+  }
+
   const handleRemoveTarget = async (executable: string): Promise<void> => {
     setErrorMsg(null)
+    setSuccessMsg(null)
     try {
       const updated = await window.api.removeTarget({ executable })
       onTargetsChange(updated)
@@ -91,10 +117,47 @@ export const TargetsManager: React.FC<TargetsManagerProps> = ({ targets, onTarge
 
   return (
     <div className="page-container">
-      {/* Educational Note: Launcher vs Game Process */}
+      {/* File Picker Hero Card */}
+      <div className="file-picker-hero" onClick={handlePickFile}>
+        <div
+          style={{
+            width: '54px',
+            height: '54px',
+            borderRadius: '16px',
+            background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(99, 102, 241, 0.2))',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '1px solid rgba(244, 63, 94, 0.4)',
+            boxShadow: '0 0 20px rgba(244, 63, 94, 0.3)'
+          }}
+        >
+          <FolderOpen size={28} color="#f43f5e" />
+        </div>
+        <div>
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <span>Pick Executable File (.exe)</span>
+            <Sparkles size={16} color="#fb7185" />
+          </h3>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px', maxWidth: '460px' }}>
+            Click here to browse your computer and select any game, launcher, or software executable to track automatically.
+          </p>
+        </div>
+        <button
+          type="button"
+          disabled={isPickingFile}
+          className="btn btn-primary"
+          style={{ marginTop: '4px', pointerEvents: 'none' }}
+        >
+          <FolderOpen size={16} />
+          {isPickingFile ? 'Selecting File...' : 'Browse Computer for .exe'}
+        </button>
+      </div>
+
+      {/* Launcher vs Game Process Guidance */}
       <div
         style={{
-          background: 'rgba(99, 102, 241, 0.1)',
+          background: 'rgba(99, 102, 241, 0.08)',
           border: '1px solid rgba(99, 102, 241, 0.25)',
           borderRadius: 'var(--radius-md)',
           padding: '16px 20px',
@@ -106,35 +169,39 @@ export const TargetsManager: React.FC<TargetsManagerProps> = ({ targets, onTarge
         <Info size={20} color="#818cf8" style={{ flexShrink: 0, marginTop: '2px' }} />
         <div>
           <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#c7d2fe', marginBottom: '4px' }}>
-            Launcher vs Game Process (Valorant, Steam, Epic)
+            Pro Tip: Game Launchers vs Game Engines (Valorant, Steam, Epic)
           </h4>
           <p style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.5 }}>
-            Many modern games use a launcher (e.g. <code>RiotClientServices.exe</code>) distinct from the actual game engine executable (e.g. <code>VALORANT-Win64-Shipping.exe</code>).
-            We recommend selecting the actual game process from the running process picker below while the game is running.
+            Many modern games use a launcher (e.g. <code>RiotClientServices.exe</code>) separate from the actual game engine (e.g. <code>VALORANT-Win64-Shipping.exe</code>).
+            Pick the actual gameplay executable or select it from the Running Process list below while the game is running.
           </p>
         </div>
       </div>
 
-      {/* Target Application List */}
+      {/* Target Application Accountability List */}
       <div className="glass-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <div>
             <h3 style={{ fontSize: '1.05rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Crosshair size={18} color="var(--primary)" />
-              Target Accountability List ({targets.length})
+              Accountability Target List ({targets.length})
             </h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              These applications will count against your daily time budget and be protected by strikes.
+              These applications deduct from your daily budget and are gently protected by strikes.
             </p>
           </div>
         </div>
 
         {targets.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px', color: 'var(--text-dim)', border: '1px dashed var(--border-color)', borderRadius: '8px' }}>
-            No targets configured yet. Add a game below to begin self-regulation.
+          <div style={{ textAlign: 'center', padding: '36px', color: 'var(--text-dim)', border: '1px dashed var(--border-color)', borderRadius: '12px' }}>
+            <Gamepad2 size={32} color="var(--text-dim)" style={{ margin: '0 auto 8px', opacity: 0.6 }} />
+            <p style={{ fontWeight: 600, fontSize: '0.92rem' }}>No targets configured yet</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '4px' }}>
+              Pick a file above or select a running game to begin practicing digital discipline.
+            </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {targets.map((target) => {
               const isBrowser = isBrowserExecutable(target.executable)
               return (
@@ -144,16 +211,27 @@ export const TargetsManager: React.FC<TargetsManagerProps> = ({ targets, onTarge
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '12px 18px',
+                    padding: '14px 18px',
                     background: 'rgba(255, 255, 255, 0.02)',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)'
+                    borderRadius: '12px',
+                    border: '1px solid var(--border-color)',
+                    transition: 'all 0.2s ease'
                   }}
                 >
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{target.name}</span>
-                      <code style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.96rem' }}>{target.name}</span>
+                      <code
+                        style={{
+                          fontSize: '0.78rem',
+                          color: 'var(--primary)',
+                          background: 'rgba(244, 63, 94, 0.1)',
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                          border: '1px solid rgba(244, 63, 94, 0.2)',
+                          fontFamily: 'var(--font-mono)'
+                        }}
+                      >
                         {target.executable}
                       </code>
                     </div>
@@ -169,7 +247,7 @@ export const TargetsManager: React.FC<TargetsManagerProps> = ({ targets, onTarge
                   <button
                     onClick={() => handleRemoveTarget(target.executable)}
                     className="btn btn-danger"
-                    style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                    style={{ padding: '6px 14px', fontSize: '0.8rem' }}
                     title="Remove from target list"
                   >
                     <Trash2 size={14} /> Remove
@@ -185,9 +263,12 @@ export const TargetsManager: React.FC<TargetsManagerProps> = ({ targets, onTarge
       <div className="glass-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700 }}>Running Process Picker</h3>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FileCode size={18} color="var(--accent)" />
+              Running Process Scanner
+            </h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Click to quickly add an actively running game or application.
+              Scan actively running Windows processes and add them with one click.
             </p>
           </div>
 
@@ -195,39 +276,40 @@ export const TargetsManager: React.FC<TargetsManagerProps> = ({ targets, onTarge
             onClick={fetchRunningProcesses}
             disabled={isLoadingProcesses}
             className="btn btn-secondary"
-            style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+            style={{ padding: '6px 14px', fontSize: '0.8rem' }}
           >
             <RefreshCw size={14} className={isLoadingProcesses ? 'animate-spin' : ''} />
-            Refresh
+            Refresh List
           </button>
         </div>
 
-        <div style={{ marginBottom: '12px', position: 'relative' }}>
-          <Search size={16} color="var(--text-dim)" style={{ position: 'absolute', left: '12px', top: '12px' }} />
+        <div style={{ marginBottom: '14px', position: 'relative' }}>
+          <Search size={16} color="var(--text-dim)" style={{ position: 'absolute', left: '14px', top: '13px' }} />
           <input
             type="text"
-            placeholder="Search running processes (e.g. steam, game, valorant)..."
+            placeholder="Filter processes (e.g. steam, valorant, chrome, discord, game)..."
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
             className="input"
-            style={{ width: '100%', paddingLeft: '38px' }}
+            style={{ width: '100%', paddingLeft: '40px' }}
           />
         </div>
 
         <div
           style={{
-            maxHeight: '220px',
+            maxHeight: '230px',
             overflowY: 'auto',
             border: '1px solid var(--border-color)',
-            borderRadius: '8px',
-            padding: '6px',
+            borderRadius: '10px',
+            padding: '8px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '4px'
+            gap: '6px',
+            background: 'rgba(0, 0, 0, 0.2)'
           }}
         >
           {filteredProcesses.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '16px', color: 'var(--text-dim)', fontSize: '0.85rem' }}>
+            <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-dim)', fontSize: '0.85rem' }}>
               {isLoadingProcesses ? 'Scanning process list...' : 'No matching processes found'}
             </div>
           ) : (
@@ -240,30 +322,30 @@ export const TargetsManager: React.FC<TargetsManagerProps> = ({ targets, onTarge
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '8px 12px',
-                    borderRadius: '6px',
-                    background: added ? 'rgba(16, 185, 129, 0.05)' : 'transparent',
-                    border: '1px solid transparent'
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    background: added ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                    border: `1px solid ${added ? 'rgba(16, 185, 129, 0.25)' : 'transparent'}`
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{proc.name}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 600 }}>{proc.name}</span>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
                       PID: {proc.pid}
                     </span>
                   </div>
 
                   {added ? (
-                    <span style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Check size={14} /> Added
+                    <span style={{ fontSize: '0.78rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}>
+                      <Check size={14} /> Active Target
                     </span>
                   ) : (
                     <button
                       onClick={() => handleAddTarget(proc.name, proc.name.replace(/\.exe$/i, ''))}
                       className="btn btn-secondary"
-                      style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                      style={{ padding: '4px 12px', fontSize: '0.75rem' }}
                     >
-                      <Plus size={12} /> Track
+                      <Plus size={13} /> Track
                     </button>
                   )}
                 </div>
@@ -278,22 +360,22 @@ export const TargetsManager: React.FC<TargetsManagerProps> = ({ targets, onTarge
         <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '12px' }}>
           Add Application Manually
         </h3>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
           <input
             type="text"
-            placeholder="Executable name (e.g. steam.exe)"
+            placeholder="Executable name (e.g. cyberpunk2077.exe)"
             value={manualExecutable}
             onChange={(e) => setManualExecutable(e.target.value)}
             className="input"
-            style={{ flex: 1 }}
+            style={{ flex: 1, minWidth: '220px' }}
           />
           <input
             type="text"
-            placeholder="Display name (optional)"
+            placeholder="Display name (optional, e.g. Cyberpunk 2077)"
             value={manualName}
             onChange={(e) => setManualName(e.target.value)}
             className="input"
-            style={{ flex: 1 }}
+            style={{ flex: 1, minWidth: '220px' }}
           />
           <button
             onClick={() => handleAddTarget(manualExecutable, manualName)}
@@ -304,8 +386,14 @@ export const TargetsManager: React.FC<TargetsManagerProps> = ({ targets, onTarge
           </button>
         </div>
 
+        {successMsg && (
+          <p style={{ color: '#10b981', fontSize: '0.85rem', marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Check size={15} /> {successMsg}
+          </p>
+        )}
+
         {errorMsg && (
-          <p style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '10px' }}>
+          <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '10px' }}>
             {errorMsg}
           </p>
         )}

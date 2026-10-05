@@ -14,6 +14,9 @@ export const IPC_CHANNELS = {
   UPDATE_CONFIG: 'config:update',
   GET_HISTORY: 'history:get',
 
+  // Dialogs & File Picker
+  PICK_EXECUTABLE_FILE: 'dialog:pick-executable',
+
   // Window Controls
   WINDOW_MINIMIZE: 'window:minimize',
   WINDOW_CLOSE: 'window:close',
