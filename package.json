@@ -18,7 +18,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css,yml,yaml}\"",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "prepare": "husky"
+    "prepare": "node -e \"if (!process.env.CI) { try { require('child_process').execSync('pnpm exec husky', { stdio: 'inherit' }) } catch {} }\""
   },
   "dependencies": {
     "active-win": "^8.2.1",
