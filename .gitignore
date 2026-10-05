@@ -13,6 +13,7 @@ dist
 dist-electron
 out
 .cache
+scratch
 coverage
 *.tsbuildinfo
 

@@ -7,10 +7,19 @@
   },
   "files": [
     "out/**/*",
+    "resources/**/*",
     "node_modules/active-win/**/*"
   ],
+  "extraResources": [
+    {
+      "from": "resources",
+      "to": "resources",
+      "filter": ["**/*"]
+    }
+  ],
   "asarUnpack": [
-    "**/node_modules/active-win/**"
+    "**/node_modules/active-win/**",
+    "**/resources/**"
   ],
   "win": {
     "icon": "build/icon.png",

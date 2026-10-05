@@ -1,3 +1,4 @@
+import path from 'path'
 import type {
   Clock,
   WindowProvider,
@@ -204,26 +205,100 @@ export class FocusEngine {
     const currentDate = this.clock.today()
     const targets = this.store.getTargets()
 
-    // 1. Query active foreground window
-    const activeWin = await this.windowProvider.getActiveWindow()
-    const activeExecutable = activeWin?.name?.toLowerCase() || null
-
-    const matchedTarget = activeExecutable
-      ? targets.find((t) => t.executable.toLowerCase() === activeExecutable) || null
-      : null
-
-    const isTargetForeground = !!matchedTarget
-
-    // 2. Query idle state
-    const idleSeconds = this.idleProvider.getIdleTimeSec()
-    const isSystemIdle = idleSeconds >= this.config.idleThresholdSeconds
-
-    // 3. Query all running processes to check if any targets are currently running
+    // 1. Query all running processes (tasklist.exe)
     const runningProcesses = await this.processProvider.getRunningProcesses()
     const targetRunningProcesses = runningProcesses.filter((proc) =>
       targets.some((t) => t.executable.toLowerCase() === proc.name.toLowerCase())
     )
     const hasRunningTargets = targetRunningProcesses.length > 0
+
+    // 2. Query active foreground window (active-win or native user32 fallback)
+    const activeWin = await this.windowProvider.getActiveWindow()
+
+    // Determine foreground executable:
+    // If activeWin has a PID, match it against runningProcesses (from tasklist.exe)
+    let activeExecutable = activeWin?.name?.toLowerCase() || ''
+    if (activeWin?.pid && (!activeExecutable || !activeExecutable.endsWith('.exe'))) {
+      const matchFromPid = runningProcesses.find((p) => p.pid === activeWin.pid)
+      if (matchFromPid) {
+        activeExecutable = matchFromPid.name.toLowerCase()
+      }
+    }
+
+    // Next, check path if available
+    if (activeWin?.path && (!activeExecutable || !activeExecutable.endsWith('.exe'))) {
+      activeExecutable = path.basename(activeWin.path).toLowerCase()
+    }
+
+    // 3. Multi-layer Target Matcher (anti-cheat safe, supports launchers & descriptions)
+    let matchedTarget: TargetApp | null = null
+
+    if (activeExecutable || activeWin) {
+      matchedTarget =
+        targets.find((t) => {
+          const targetExe = t.executable.toLowerCase()
+          const targetBase = targetExe.replace(/\.exe$/i, '')
+          const targetDisplayName = t.name.toLowerCase().trim()
+
+          // A. Direct executable match (e.g. valorant-win64-shipping.exe)
+          if (
+            activeExecutable &&
+            (targetExe === activeExecutable ||
+              targetBase === activeExecutable.replace(/\.exe$/i, '') ||
+              targetExe === `${activeExecutable}.exe`)
+          ) {
+            return true
+          }
+
+          // B. ActiveWin raw name match (e.g. "VALORANT" or "VALORANT.exe")
+          if (activeWin?.name) {
+            const rawName = activeWin.name.toLowerCase().trim()
+            if (
+              targetExe === rawName ||
+              targetBase === rawName.replace(/\.exe$/i, '') ||
+              targetExe === `${rawName}.exe`
+            ) {
+              return true
+            }
+          }
+
+          // C. ActiveWin path match
+          if (activeWin?.path) {
+            const pathExe = path.basename(activeWin.path).toLowerCase()
+            if (targetExe === pathExe || targetBase === pathExe.replace(/\.exe$/i, '')) {
+              return true
+            }
+          }
+
+          // D. Window Title match (e.g. Window title is "VALORANT  " or "Brawlhalla")
+          if (activeWin?.title && activeWin.title.trim().length > 0) {
+            const titleLower = activeWin.title.toLowerCase().trim()
+            if (
+              titleLower.includes(targetBase) ||
+              (targetDisplayName && titleLower.includes(targetDisplayName)) ||
+              (targetBase === 'valorant' && titleLower.startsWith('valorant')) ||
+              (targetBase === 'valorant-win64-shipping' && titleLower.startsWith('valorant')) ||
+              (targetBase === 'brawlhalla' && titleLower.includes('brawlhalla'))
+            ) {
+              // Ensure this is backed by an actively running target process or activeWin PID
+              const isTargetRunning = targetRunningProcesses.some(
+                (p) => p.name.toLowerCase() === targetExe || (activeWin.pid && p.pid === activeWin.pid)
+              )
+              if (isTargetRunning) {
+                return true
+              }
+            }
+          }
+
+          return false
+        }) || null
+    }
+
+    const isTargetForeground = !!matchedTarget
+
+    // 4. Query idle state
+    const idleSeconds = this.idleProvider.getIdleTimeSec()
+    const isSystemIdle = idleSeconds >= this.config.idleThresholdSeconds
 
     const isTrackingActive =
       isTargetForeground &&
@@ -232,7 +307,7 @@ export class FocusEngine {
       !this.isSessionLocked &&
       (this.state.state === 'IDLE_BUDGET' || this.state.state === 'EXTENDED')
 
-    // 4. Run State Machine Reducer
+    // 5. Run State Machine Reducer
     const engineConfig: EngineConfig = {
       dailyBudgetMinutes: this.config.dailyBudgetMinutes,
       maxStrikes: MAX_STRIKES,
@@ -247,7 +322,7 @@ export class FocusEngine {
         isTargetForeground,
         isSystemIdle,
         isSessionSuspended: this.isSuspended || this.isSessionLocked,
-        activeExecutable,
+        activeExecutable: matchedTarget?.executable || activeExecutable || null,
         hasRunningTargets,
         currentDate
       },
@@ -256,7 +331,7 @@ export class FocusEngine {
 
     this.state = result.nextState
 
-    // 5. Handle Side Effects
+    // 6. Handle Side Effects
     if (result.effects.didDailyReset) {
       console.log(`[FocusEngine] Daily reset executed for date ${currentDate}`)
       this.persist(true)
@@ -274,18 +349,18 @@ export class FocusEngine {
       await this.enforceProcessClosure(targetRunningProcesses)
     }
 
-    // 6. Periodic Persistence
+    // 7. Periodic Persistence
     if (now - this.lastPersistTimestamp >= PERSIST_INTERVAL_MS) {
       this.persist(false)
       this.lastPersistTimestamp = now
     }
 
-    // 7. Notify listeners (UI)
+    // 8. Notify listeners (UI)
     const activeProcInfo: ProcessInfo | null =
       activeWin && matchedTarget
         ? {
             pid: activeWin.pid,
-            name: activeWin.name,
+            name: activeExecutable || activeWin.name || matchedTarget.executable,
             windowTitle: activeWin.title
           }
         : null

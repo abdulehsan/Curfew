@@ -8,6 +8,7 @@ export interface ActiveWindowInfo {
   pid: number
   name: string
   title: string
+  path?: string
 }
 
 export interface Clock {
