@@ -39,7 +39,7 @@ jobs:
         run: pnpm run build
 
       - name: Package with Electron Builder
-        run: pnpm exec electron-builder --win nsis portable --publish never
+        run: pnpm exec electron-builder --win --publish never
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
